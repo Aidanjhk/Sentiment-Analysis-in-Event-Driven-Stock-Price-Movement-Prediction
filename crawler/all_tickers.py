@@ -5,43 +5,59 @@ Output filename: ./input/tickerList.csv
 """
 import csv
 import sys
-
+import urllib3
 from urllib.request import urlopen
-
+import requests
 import numpy as np
-
+import json
 
 def get_tickers(percent):
     """Keep the top percent market-cap companies."""
     assert isinstance(percent, int)
 
-    file = open('./input/tickerList.csv', 'w')
+    file = open('input/tickerList.csv', 'w')
     writer = csv.writer(file, delimiter=',')
     cap_stat, output = np.array([]), []
-    for exchange in ["NASDAQ", "NYSE", "AMEX"]:
-        url = "http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange="
-        repeat_times = 10 # repeat downloading in case of http error
+    http = urllib3.PoolManager()
+
+    for exchange in ["NASDAQ","NYSE", "AMEX"]:
+        # Construct the URL with the exchange value already appended
+        url = "https://api.nasdaq.com/api/screener/stocks?offset=0&exchange="+exchange+"&download=true"
+        print(url)
+        repeat_times = 1
+        
         for _ in range(repeat_times):
             try:
                 print("Downloading tickers from {}...".format(exchange))
-                response = urlopen(url + exchange + '&render=download')
-                content = response.read().decode('utf-8').split('\n')
-                for num, line in enumerate(content):
-                    line = line.strip().strip('"').split('","')
-                    if num == 0 or len(line) != 9:
-                        continue # filter unmatched format
+                response = requests.get(url, headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+                })
+                response.raise_for_status()  # Check if the request was successful
+
+                content = json.loads(response.text)
+                for line in content['data']['rows']:
+                    
+                    ticker = line['symbol']
+                    name = line['name']
+                    market_cap = line['marketCap']
+                    
                     # ticker, name, last_sale, market_cap, IPO_year, sector, industry
-                    ticker, name, _, market_cap, _, _, _ = line[0:4] + line[5:8]
-                    cap_stat = np.append(cap_stat, float(market_cap))
+                    
                     output.append([ticker, name.replace(',', '').replace('.', ''),
                                    exchange, market_cap])
+                    
                 break
-            except:
+            except OSError:
                 continue
 
     for data in output:
-        market_cap = float(data[3])
-        if market_cap < np.percentile(cap_stat, 100 - percent):
+        try:
+            market_cap = float(data[3])
+        except:
+            continue
+        print(data)
+
+        if len(data) < 4:
             continue
         writer.writerow(data)
 
@@ -56,3 +72,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

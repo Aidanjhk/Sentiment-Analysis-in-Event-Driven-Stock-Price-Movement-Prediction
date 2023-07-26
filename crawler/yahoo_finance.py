@@ -13,20 +13,44 @@ json structure:
    dates dates  dates ...
 """
 import sys
+import csv
 import re
 import os
 import time
 import random
 import json
-
+import pandas as pd
 # Credit: https://github.com/c0redumb/yahoo_quote_download/blob/master/yahoo_quote_download/yqd.py
 from yqd import load_yahoo_quote
 
 
 def calc_finished_ticker():
-    os.system("awk -F',' '{print $1}' ./input/news_reuters.csv | sort | uniq > ./input/finished.reuters")
+    # Read the CSV file
+    data = []
 
+    try:
+        with open('input/news_reuters.csv', 'r', newline='', encoding='utf-8') as csvfile:
+            csvreader = csv.reader(csvfile)
+            for row in csvreader:
+                # Add the row to the data list if it has the expected number of fields
+                if len(row) == 6:
+                    data.append(row.)
+    except Exception as e:
+        # Handle any errors that occur during CSV processing
+        print(f"CSV processing error: {e}")
+        # Optionally, you can log the error or take other actions
+    
 
+    # Extract the first column and remove duplicates
+    column1 = data[:]
+
+    # Sort the values
+    # sorted_column1 = column1.sort_values()
+
+    # Save the results to a new file
+    with open('input/news_reuters.csv', 'w+') as csvfile:
+            csvfile.writelines(column1[0])
+           
 def get_stock_prices():
     fin = open('./input/finished.reuters')
     output = './input/stockPrices_raw.json'
@@ -70,6 +94,7 @@ def get_price_from_yahoo(ticker, start_date, end_date):
         line = line.strip().split(',')
         if len(line) < 7 or num == 0:
             continue
+        print(line)
         date = line[0]
         # check if the date type matched with the standard type
         if not re.search(r'^[12]\d{3}-[01]\d-[0123]\d$', date):

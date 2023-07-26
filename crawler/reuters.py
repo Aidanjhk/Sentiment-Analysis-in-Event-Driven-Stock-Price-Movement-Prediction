@@ -76,7 +76,7 @@ class ReutersCrawler(object):
     def get_news_num_whenever(self, url):
         # check the website to see if the ticker has any news
         # return the number of news
-        soup = util.get_soup_with_repeat(url, repeat_times=4)
+        soup = util.get_soup_with_repeat(url, repeat_times=1)
         if soup:
             return len(soup.find_all("div", {'class': ['topStory', 'feature']}))
         return 0
@@ -135,9 +135,13 @@ class ReutersCrawler(object):
 
         # store low-priority task and run later
         delayed_tasks = {'LOWEST': set(), 'LOW': set()}
+        
         with open(self.ticker_list_filename) as ticker_list:
             for line in ticker_list:  # iterate all possible tickers
+                
                 task = tuple(line.strip().split(','))
+                if len(task) != 4:
+                    continue
                 ticker, name, exchange, market_cap = task
                 if ticker in finished_tickers:
                     continue
@@ -146,7 +150,7 @@ class ReutersCrawler(object):
                     delayed_tasks[priority].add(task)
                     continue
                 self.fetch_content(task, date_range)
-
+       
         # run task with low priority
         for task in delayed_tasks['LOW']:
             self.fetch_content(task, date_range)
@@ -157,7 +161,9 @@ class ReutersCrawler(object):
 
 def main():
     reuter_crawler = ReutersCrawler()
-    reuter_crawler.run(1)
+    reuter_crawler.run(1000)
 
 if __name__ == "__main__":
+    #new_directory_path = 'C:\Users\server_2022\Downloads\Sentiment-Analysis-in-Event-Driven-Stock-Price-Movement-Prediction'
+    #os.chdir(new_directory_path)
     main()

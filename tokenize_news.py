@@ -6,7 +6,7 @@ import argparse
 import json
 import numpy as np
 import nltk
-
+import glob
 import util
 
 
@@ -30,11 +30,15 @@ def tokenize(news_file, price_file, stopWords_file, output, output_wd2idx, sen_l
         priceDt = json.load(file)[term_type]
 
     testDates = util.dateGenerator(90) # the most recent days are used for testing
-    os.system('rm ' + output + mtype)
+    if os.path.exists(output + mtype):
+        os.remove(output + mtype)
+
+
 
     # load stop words
     stopWords = set()
-    with open(stopWords_file) as file:
+    with open(stopWords_file, encoding='utf-8') as file:
+
         for word in file:
             stopWords.add(word.strip())
 
@@ -44,8 +48,16 @@ def tokenize(news_file, price_file, stopWords_file, output, output_wd2idx, sen_l
     current_idx = 2
     word_idx_count = {0: float('inf'), 1: float('inf')}
     sentences, labels = [], []
-    os.system('cat ./input/news/*/* > ./input/news_reuters.csv')
-    with open(news_file) as f:
+   
+
+    with open("./input/news_reuters.csv", "w", encoding='utf-8') as outfile:
+        for file in glob.glob("./input/news/*/*"):
+            with open(file, "r", encoding='utf-8') as infile:
+                outfile.write(infile.read())
+
+
+    with open(news_file, encoding='utf-8') as f:
+
         for num, line in enumerate(f):
             line = line.strip().split(',')
             if len(line) not in [6, 7]:
