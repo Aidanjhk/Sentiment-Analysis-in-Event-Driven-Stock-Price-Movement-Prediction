@@ -34,7 +34,7 @@ def calc_finished_ticker():
             for row in csvreader:
                 # Add the row to the data list if it has the expected number of fields
                 if len(row) == 6:
-                    data.append(row.)
+                    data.append(row)
     except Exception as e:
         # Handle any errors that occur during CSV processing
         print(f"CSV processing error: {e}")

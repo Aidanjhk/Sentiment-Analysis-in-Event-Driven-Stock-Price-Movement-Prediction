@@ -50,9 +50,9 @@ class ReutersCrawler(object):
         print("%s - %s - %s - %s" % (ticker, name, exchange, market_cap))
 
         suffix = {'AMEX': '.A', 'NASDAQ': '.O', 'NYSE': '.N'}
-        # e.g. https://www.reuters.com/finance/stocks/company-news/BIDU.O?date=09262017
-        url = "https://www.reuters.com/finance/stocks/company-news/" + ticker + suffix[exchange]
-        
+        # e.g. https://www.reuters.com/markets/companies/BIDU.O?date=09262017
+        url = "https://www.reuters.com/site-search/?query="+ticker+"&sort=newest&offset=0"  
+        print(url)
         ticker_failed = open(self.failed_reuters_filename, 'a+')
         today = datetime.datetime.today().strftime("%Y%m%d")
 

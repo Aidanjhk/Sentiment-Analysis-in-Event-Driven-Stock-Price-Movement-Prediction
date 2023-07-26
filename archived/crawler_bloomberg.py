@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import re
-import urllib2
+import urllib3
 import csv
 import os
 import sys
@@ -35,18 +35,20 @@ class news_Bloomberg:
             line = line.strip().split(',')
             ticker, name, exchange, MarketCap = line
             if ticker in filterList: continue
-            print ticker
+            print(ticker)
             self.content(ticker, line)
 
     def content(self, ticker, line):
         url = "http://www.bloomberg.com/search?sort=time:desc&query=" + ticker 
+        print(url)
         for pn in range(1, 500):
             print(line, pn)
             tag = self.repeatDownload(ticker, line, url, pn) # if page has news, tag 1, otherwise tag 0
-            if not tag: break
+            print(tag)
+            if tag: break
 
     def repeatDownload(self, ticker, line, url, pn): 
-        repeat_times = 4 # repeat downloading in case of http error
+        repeat_times = 1 # repeat downloading in case of http error
         for _ in range(repeat_times): 
             try:
                 time.sleep(np.random.poisson(3))
